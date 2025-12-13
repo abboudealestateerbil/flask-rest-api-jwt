@@ -48,8 +48,8 @@ flask_api/
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repo-url>
-   cd flask_api
+git clone https://github.com/v1Rtu3-h05t/flask-rest-api-jwt.git
+cd flask-rest-api-jwt
    ```
 
 2. **Create virtual environment**
