@@ -314,7 +314,7 @@ For more detailed troubleshooting, see the testing guides.
 
 ## License
 
-This project is open source and available under the [MIT License](LICENSE).
+This project is open source and available under the MIT License.
 
 ## Author
 
