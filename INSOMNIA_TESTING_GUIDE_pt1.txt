@@ -1,0 +1,426 @@
+# INSOMNIA_TESTING_GUIDE_PART1 PART 1 OF 2
+
+---
+
+## TABLE OF CONTENTS
+
+**PART 1 (This File):**
+1. Quick Start Checklist
+2. Starting Your Flask Server
+3. Insomnia Basics 101
+4. Complete Testing Workflow (Phases 1-3)
+
+**PART 2 (Separate File):**
+5. Testing Workflow (Phases 4-6)
+6. All API Endpoints Reference
+7. Common Errors & Solutions
+8. Pro Tips & Environment Variables
+
+---
+
+## 1. QUICK START CHECKLIST
+
+Before testing, verify you have:
+
+- [ ] Python 3.11+ installed
+- [ ] VSCode open with `flask_api` project
+- [ ] Virtual environment activated
+- [ ] Dependencies installed
+- [ ] Insomnia installed (https://insomnia.rest/download)
+
+**Quick Setup:**
+
+```bash
+# Navigate to project
+cd C:\Users\antmo\Desktop\flask_api
+
+# Activate virtual environment
+.\venv\Scripts\activate
+
+# Verify dependencies
+pip list
+```
+
+---
+
+## 2. STARTING YOUR FLASK SERVER
+
+### Step-by-Step
+
+1. Open Terminal in VSCode: `Ctrl + ~`
+2. Navigate: `cd C:\Users\antmo\Desktop\flask_api`
+3. Activate venv: `.\venv\Scripts\activate`
+4. Start server: `python run.py`
+
+**✅ You should see:**
+```
+* Running on http://127.0.0.1:5000
+* Debug mode: on
+```
+
+**Server Commands:**
+- **Stop:** `Ctrl + C`
+- **Restart:** Stop, then `python run.py`
+
+**⚠️ IMPORTANT:** Server must run during ALL tests!
+
+---
+
+## 3. INSOMNIA BASICS 101
+
+### What is Insomnia?
+HTTP client for testing APIs - sends requests to your Flask server.
+
+### Interface Overview
+```
+┌──────────────────────────────────────────┐
+│ [Method ▼] [URL Box          ] [Send]   │
+├──────────────────────────────────────────┤
+│ Tabs: Body | Headers | Query            │
+├──────────────────────────────────────────┤
+│         RESPONSE AREA                    │
+└──────────────────────────────────────────┘
+```
+
+### HTTP Methods
+- **GET:** Read/retrieve data
+- **POST:** Create new data
+- **PUT:** Update data
+- **DELETE:** Remove data
+
+### Status Codes
+- **200 OK:** Success
+- **201 Created:** New resource created
+- **400 Bad Request:** Invalid data
+- **401 Unauthorized:** Missing/invalid token
+- **404 Not Found:** Resource doesn't exist
+- **422 Unprocessable:** Wrong token format
+- **500 Server Error:** Server crashed (check terminal)
+
+---
+
+## 4. COMPLETE TESTING WORKFLOW
+
+### Master Flow
+```
+Register → Login → Save Tokens → Create → Read → Update → Delete → Refresh → Logout
+```
+
+---
+
+## PHASE 1: USER AUTHENTICATION
+
+### TEST 1: Register User
+
+**Setup:**
+- Name: `1. Register User`
+- Method: **POST**
+- URL: `http://127.0.0.1:5000/user/register`
+
+**Body (JSON):**
+```json
+{
+  "username": "testuser",
+  "password": "password123"
+}
+```
+
+**✅ Expected (201):**
+```json
+{
+  "id": 1,
+  "username": "testuser"
+}
+```
+
+**Errors:**
+- **400 "User exists":** Try `testuser2`
+- **500 Error:** Check Flask terminal
+
+---
+
+### TEST 2: Login
+
+**Setup:**
+- Name: `2. Login`
+- Method: **POST**
+- URL: `http://127.0.0.1:5000/user/login`
+
+**Body (JSON):**
+```json
+{
+  "username": "testuser",
+  "password": "password123"
+}
+```
+
+**✅ Expected (200):**
+```json
+{
+  "access_token": "eyJ0eXAi...",
+  "refresh_token": "eyJ0eXAi..."
+}
+```
+
+**🚨 SAVE BOTH TOKENS NOW!**
+
+Open Notepad and save:
+```
+Access Token (15 min):
+eyJ0eXAi...
+
+Refresh Token (30 days):
+eyJ0eXAi...
+```
+
+**Token Info:**
+- **Access:** 15 min lifespan, use for all requests
+- **Refresh:** 30 days lifespan, get new access tokens
+
+---
+
+## PHASE 2: STORES
+
+### TEST 3: Create Store
+
+**Setup:**
+- Name: `3. Create Store`
+- Method: **POST**
+- URL: `http://127.0.0.1:5000/store/`
+
+**Headers:**
+- Name: `Authorization`
+- Value: `Bearer YOUR_ACCESS_TOKEN`
+
+**⚠️ Format:** `Bearer [space] token`
+
+**Body (JSON):**
+```json
+{
+  "name": "My Awesome Store"
+}
+```
+
+**✅ Expected (201):**
+```json
+{
+  "id": 1,
+  "name": "My Awesome Store",
+  "user_id": 1
+}
+```
+
+**📝 Save store ID: 1**
+
+**Errors:**
+- **401:** Check token format
+- **422 "Subject must be a string":** Missing "Bearer " or space
+
+---
+
+### TEST 4: Get All Stores
+
+**Setup:**
+- Method: **GET**
+- URL: `http://127.0.0.1:5000/store/s`
+- Headers: `Authorization: Bearer TOKEN`
+
+**✅ Expected (200):**
+```json
+[
+  {
+    "id": 1,
+    "name": "My Awesome Store",
+    "user_id": 1
+  }
+]
+```
+
+---
+
+### TEST 5: Get Store by ID
+
+**Setup:**
+- Method: **GET**
+- URL: `http://127.0.0.1:5000/store/1`
+- Headers: `Authorization: Bearer TOKEN`
+
+**✅ Expected (200):**
+```json
+{
+  "id": 1,
+  "name": "My Awesome Store",
+  "user_id": 1
+}
+```
+
+**Errors:**
+- **404:** Store doesn't exist
+- **401:** Not your store
+
+---
+
+### TEST 6: Delete Store
+
+**⚠️ WARNING:** Deletes store + all items/tags
+
+**Setup:**
+- Method: **DELETE**
+- URL: `http://127.0.0.1:5000/store/2`
+- Headers: `Authorization: Bearer TOKEN`
+
+**✅ Expected (200):**
+```json
+{
+  "message": "Deleted"
+}
+```
+
+**Tip:** Create test store first, then delete it
+
+---
+
+## PHASE 3: ITEMS
+
+### TEST 7: Create Item
+
+**⚠️ Need store first (TEST 3)**
+
+**Setup:**
+- Method: **POST**
+- URL: `http://127.0.0.1:5000/item/`
+- Headers: `Authorization: Bearer TOKEN`
+
+**Body (JSON):**
+```json
+{
+  "name": "Cool Product",
+  "price": 29.99,
+  "store_id": 1
+}
+```
+
+**⚠️ Use YOUR store_id!**
+
+**✅ Expected (201):**
+```json
+{
+  "id": 1,
+  "name": "Cool Product",
+  "price": 29.99,
+  "store_id": 1
+}
+```
+
+**📝 Save item ID**
+
+---
+
+### TEST 8: Get All Items
+
+**Setup:**
+- Method: **GET**
+- URL: `http://127.0.0.1:5000/item/s`
+- Headers: `Authorization: Bearer TOKEN`
+
+**✅ Expected (200):**
+```json
+[
+  {
+    "id": 1,
+    "name": "Cool Product",
+    "price": 29.99,
+    "store_id": 1
+  }
+]
+```
+
+---
+
+### TEST 9: Get Item by ID
+
+**Setup:**
+- Method: **GET**
+- URL: `http://127.0.0.1:5000/item/1`
+- Headers: `Authorization: Bearer TOKEN`
+
+**✅ Expected (200):**
+```json
+{
+  "id": 1,
+  "name": "Cool Product",
+  "price": 29.99,
+  "store_id": 1
+}
+```
+
+---
+
+### TEST 10: Update Item
+
+**Setup:**
+- Method: **PUT**
+- URL: `http://127.0.0.1:5000/item/1`
+- Headers: `Authorization: Bearer TOKEN`
+
+**Body (JSON) - Update name & price:**
+```json
+{
+  "name": "Updated Product",
+  "price": 39.99
+}
+```
+
+**Body (JSON) - Move to different store:**
+```json
+{
+  "name": "Updated Product",
+  "price": 39.99,
+  "store_id": 2
+}
+```
+
+**Body (JSON) - Update only price:**
+```json
+{
+  "price": 24.99
+}
+```
+
+**✅ Expected (200):**
+```json
+{
+  "id": 1,
+  "name": "Updated Product",
+  "price": 39.99,
+  "store_id": 1
+}
+```
+
+---
+
+### TEST 11: Delete Item
+
+**Setup:**
+- Method: **DELETE**
+- URL: `http://127.0.0.1:5000/item/1`
+- Headers: `Authorization: Bearer TOKEN`
+
+**✅ Expected (200):**
+```json
+{
+  "message": "Deleted"
+}
+```
+
+---
+
+**END OF PART 1**
+
+Continue with PART 2 for:
+- Tags endpoints
+- Token management (refresh/logout)
+- User management
+- Complete endpoint reference
+- Troubleshooting guide
+- Pro tips

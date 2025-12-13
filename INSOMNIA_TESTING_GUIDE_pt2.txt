@@ -1,0 +1,712 @@
+# INSOMNIA_TESTING_GUIDE_PART1 PART 2 OF 2
+
+---
+
+## PHASE 4: TAGS
+
+### TEST 12: Create Tag
+
+**⚠️ Need store first**
+
+**Setup:**
+- Name: `12. Create Tag`
+- Method: **POST**
+- URL: `http://127.0.0.1:5000/tag/store/1` (replace 1 with your store ID)
+- Headers: `Authorization: Bearer TOKEN`
+
+**Body (JSON):**
+```json
+{
+  "name": "Electronics"
+}
+```
+
+**✅ Expected (201):**
+```json
+{
+  "id": 1,
+  "name": "Electronics",
+  "store_id": 1
+}
+```
+
+**Tag Examples:**
+```json
+{"name": "Clothing"}
+{"name": "Books"}
+{"name": "Sale Items"}
+{"name": "New Arrivals"}
+```
+
+---
+
+### TEST 13: Get Tag by ID
+
+**Setup:**
+- Method: **GET**
+- URL: `http://127.0.0.1:5000/tag/1`
+- Headers: `Authorization: Bearer TOKEN`
+
+**✅ Expected (200):**
+```json
+{
+  "id": 1,
+  "name": "Electronics",
+  "store_id": 1
+}
+```
+
+---
+
+### TEST 14: Get Tags in Store
+
+**Setup:**
+- Method: **GET**
+- URL: `http://127.0.0.1:5000/tag/store/1/s` (replace 1 with store ID)
+- Headers: `Authorization: Bearer TOKEN`
+
+**✅ Expected (200):**
+```json
+[
+  {
+    "id": 1,
+    "name": "Electronics",
+    "store_id": 1
+  },
+  {
+    "id": 2,
+    "name": "Gadgets",
+    "store_id": 1
+  }
+]
+```
+
+---
+
+### TEST 15: Delete Tag
+
+**Setup:**
+- Method: **DELETE**
+- URL: `http://127.0.0.1:5000/tag/1`
+- Headers: `Authorization: Bearer TOKEN`
+
+**✅ Expected (200):**
+```json
+{
+  "message": "Deleted"
+}
+```
+
+---
+
+## PHASE 5: TOKEN MANAGEMENT
+
+### TEST 16: Refresh Token
+
+**⏰ Use when access token expires (15 min)**
+
+**Setup:**
+- Name: `16. Refresh Token`
+- Method: **POST**
+- URL: `http://127.0.0.1:5000/user/refresh`
+- Headers: `Authorization: Bearer YOUR_REFRESH_TOKEN`
+
+**🚨 CRITICAL: Use REFRESH token, NOT access!**
+
+**✅ Expected (200):**
+```json
+{
+  "access_token": "eyJ0eXAi..."
+}
+```
+
+**📝 Save new access token, use for subsequent requests**
+
+**Refresh Workflow:**
+```
+1. Access token expires (15 min)
+   ↓
+2. GET 401 "Token has expired"
+   ↓
+3. Use refresh token → get NEW access token
+   ↓
+4. Continue testing with new token
+```
+
+**Errors:**
+- **401:** Used access instead of refresh
+- **401 "Token has expired":** Refresh expired (30 days), login again
+- **401 "Token has been revoked":** You logged out, login again
+
+---
+
+### TEST 17: Logout
+
+**⚠️ After logout, must login again!**
+
+**Setup:**
+- Name: `17. Logout`
+- Method: **POST**
+- URL: `http://127.0.0.1:5000/user/logout`
+- Headers: `Authorization: Bearer ACCESS_TOKEN`
+
+**⚠️ Use ACCESS token (not refresh)**
+
+**✅ Expected (200):**
+```json
+{
+  "message": "Logged out"
+}
+```
+
+**What Happens:**
+1. Access token blacklisted
+2. Any request with that token → 401 "Token has been revoked"
+3. Must login again for new tokens
+
+**Verification:**
+Try any endpoint after logout → Should get 401 "Token has been revoked"
+
+---
+
+## PHASE 6: USER MANAGEMENT
+
+### TEST 18: Get User
+
+**Setup:**
+- Method: **GET**
+- URL: `http://127.0.0.1:5000/user/1` (your user ID)
+- Headers: `Authorization: Bearer TOKEN`
+
+**✅ Expected (200):**
+```json
+{
+  "id": 1,
+  "username": "testuser"
+}
+```
+
+**📝 Password NOT returned (security)**
+
+**Errors:**
+- **401:** Can only view YOUR account
+- **404:** User doesn't exist
+
+---
+
+### TEST 19: Delete User
+
+**⚠️ EXTREME WARNING - DELETES EVERYTHING:**
+- User account
+- ALL stores
+- ALL items
+- ALL tags
+
+**🛡️ SAFE TESTING:**
+1. Register test user: `testuser_delete`
+2. Login as that user
+3. Create test data
+4. Delete THAT user (main account safe)
+
+**Setup:**
+- Method: **DELETE**
+- URL: `http://127.0.0.1:5000/user/1`
+- Headers: `Authorization: Bearer TOKEN`
+
+**✅ Expected (200):**
+```json
+{
+  "message": "Deleted"
+}
+```
+
+---
+
+## 5. ALL API ENDPOINTS REFERENCE
+
+### Quick Reference Table
+
+**USER ENDPOINTS:**
+```
+POST   /user/register          No auth      Create user
+POST   /user/login             No auth      Get tokens
+POST   /user/logout            Access       Revoke token
+POST   /user/refresh           Refresh      New access token
+GET    /user/<id>              Access       Get user
+DELETE /user/<id>              Access       Delete user
+```
+
+**STORE ENDPOINTS:**
+```
+POST   /store/                 Access       Create store
+GET    /store/<id>             Access       Get one store
+GET    /store/s                Access       Get all stores
+DELETE /store/<id>             Access       Delete store
+```
+
+**ITEM ENDPOINTS:**
+```
+POST   /item/                  Access       Create item
+GET    /item/s                 Access       Get all items
+GET    /item/<id>              Access       Get one item
+PUT    /item/<id>              Access       Update item
+DELETE /item/<id>              Access       Delete item
+```
+
+**TAG ENDPOINTS:**
+```
+POST   /tag/store/<store_id>   Access       Create tag
+GET    /tag/<id>               Access       Get one tag
+GET    /tag/store/<id>/s       Access       Get store tags
+DELETE /tag/<id>               Access       Delete tag
+```
+
+**Auth Types:**
+- **No auth:** No token required
+- **Access:** Access token required
+- **Refresh:** Refresh token required
+
+---
+
+## 6. COMMON ERRORS & SOLUTIONS
+
+### Connection Errors
+
+**"Connection Refused" / "Failed to fetch"**
+- **Cause:** Flask not running
+- **Solution:**
+  1. Check terminal for "Running on http://127.0.0.1:5000"
+  2. If not, run: `python run.py`
+  3. Ensure (venv) is active
+  4. Check you're in flask_api directory
+
+---
+
+### Token Errors
+
+**401 "Token has expired"**
+- **Cause:** Access token expired (15 min)
+- **Solution:**
+  - Option A: Use refresh token (TEST 16)
+  - Option B: Login again (TEST 2)
+
+**401 "Token has been revoked"**
+- **Cause:** You logged out
+- **Solution:** Must login again (TEST 2)
+
+**422 "Subject must be a string"**
+- **Cause:** Wrong token format
+- **Solution:**
+  - ✅ Correct: `Bearer eyJ0eXAi...`
+  - ❌ Wrong: `eyJ0eXAi...` (missing Bearer)
+  - ❌ Wrong: `Bearereyh0eXAi...` (no space)
+
+**401 "Unauthorized" on protected endpoints**
+- **Causes:**
+  1. Missing Authorization header
+  2. Wrong token format
+  3. Token expired
+  4. Trying to access someone else's data
+  5. Using refresh token instead of access
+- **Solutions:**
+  1. Add Authorization header
+  2. Check format: `Bearer [space] token`
+  3. Refresh or login
+  4. Use your own resource IDs
+  5. Use access token for regular endpoints
+
+---
+
+### Resource Errors
+
+**404 "Not Found"**
+- **Causes:**
+  1. Resource doesn't exist
+  2. Wrong ID in URL
+  3. Resource was deleted
+  4. Typo in URL
+- **Solutions:**
+  1. Do GET all request to see available IDs
+  2. Check ID carefully
+  3. Create resource first if deleted
+  4. Verify URL spelling
+
+**400 "User exists"**
+- **Cause:** Username taken
+- **Solution:** Use different username (testuser2, testuser3, etc.)
+
+---
+
+### Database Errors
+
+**Foreign key constraint errors**
+- **Cause:** Old database without cascade delete
+- **Solution:**
+  1. Delete data-dev.sqlite file
+  2. Update models.py with cascade (already done)
+  3. Restart Flask: `python run.py`
+  4. Database recreates automatically
+
+**"Module not found"**
+- **Cause:** Dependencies not installed
+- **Solution:**
+  1. Activate venv: `.\venv\Scripts\activate`
+  2. Install: `pip install -r requirements.txt`
+  3. Verify: `pip list`
+
+---
+
+### Application Errors
+
+**Changes not reflecting**
+- **Cause:** Flask needs restart
+- **Solution:**
+  1. Press `Ctrl+C`
+  2. Run: `python run.py`
+
+**Database locked**
+- **Cause:** Another process accessing SQLite
+- **Solution:**
+  1. Close DB viewers
+  2. Restart Flask
+  3. Delete data-dev.sqlite if persistent
+
+**Insomnia won't send**
+- **Causes:**
+  1. Incomplete URL
+  2. Wrong method
+  3. Body not set to JSON
+  4. Header typos
+- **Solutions:**
+  1. Use full URL: `http://127.0.0.1:5000/...`
+  2. Verify method (GET/POST/PUT/DELETE)
+  3. Set Body → JSON for POST/PUT
+  4. Check "Authorization" spelling
+  5. Create fresh request
+
+---
+
+## 7. PRO TIPS & BEST PRACTICES
+
+### Tip #1: Organize Requests
+
+Create folders in Insomnia:
+```
+📁 Flask API Tests
+   📁 1. Authentication
+      - Register
+      - Login
+      - Refresh
+      - Logout
+   📁 2. Users
+      - Get User
+      - Delete User
+   📁 3. Stores
+      - Create Store
+      - Get All Stores
+      - Get Store by ID
+      - Delete Store
+   📁 4. Items
+      - Create Item
+      - Get All Items
+      - Get Item
+      - Update Item
+      - Delete Item
+   📁 5. Tags
+      - Create Tag
+      - Get Tag
+      - Get Store Tags
+      - Delete Tag
+```
+
+---
+
+### Tip #2: Use Descriptive Names
+
+**Good:**
+- `1. Register - testuser`
+- `3. Create Store - Electronics Shop`
+- `7. Create Item - Laptop in Store 1`
+
+**Bad:**
+- `Request 1`
+- `New Request`
+- `Test`
+
+---
+
+### Tip #3: Create Test Data Sets
+
+Create reusable test scenarios:
+
+**Scenario 1: Electronics Store**
+```json
+Store: {"name": "Tech Hub"}
+Items:
+  - {"name": "Laptop", "price": 999, "store_id": 1}
+  - {"name": "Mouse", "price": 25, "store_id": 1}
+Tags:
+  - {"name": "Electronics"}
+  - {"name": "Computers"}
+```
+
+**Scenario 2: Clothing Store**
+```json
+Store: {"name": "Fashion Boutique"}
+Items:
+  - {"name": "T-Shirt", "price": 19.99, "store_id": 2}
+  - {"name": "Jeans", "price": 49.99, "store_id": 2}
+Tags:
+  - {"name": "Clothing"}
+  - {"name": "Sale"}
+```
+
+---
+
+### Tip #4: Testing Workflow
+
+**Recommended Order:**
+1. Register + Login (get fresh tokens)
+2. Test all CREATE operations
+3. Test all READ operations
+4. Test all UPDATE operations
+5. Test all DELETE operations
+6. Test token refresh
+7. Test logout (do this LAST)
+
+**Why this order?**
+- Creates data to work with
+- Tests all CRUD operations
+- Logout at end (won't need to re-login)
+
+---
+
+### Tip #5: Keep a Testing Log
+
+Create a file: `TESTING_LOG.txt`
+
+```
+=== Testing Session: 2025-12-13 ===
+
+Tokens:
+Access: eyJ0eXAi... (expires 00:30)
+Refresh: eyJ0eXAi...
+
+Created:
+- User ID: 1 (testuser)
+- Store ID: 1 (My Awesome Store)
+- Store ID: 2 (Second Store)
+- Item ID: 1 (Cool Product in Store 1)
+- Tag ID: 1 (Electronics in Store 1)
+
+Tests Passed:
+✅ Register
+✅ Login
+✅ Create Store
+✅ Create Item
+✅ Create Tag
+✅ Get All Stores
+✅ Update Item
+✅ Delete Tag
+✅ Refresh Token
+✅ Logout
+
+Issues Found:
+- None today!
+
+Notes:
+- Token expires at 00:30, refreshed at 00:25
+- Tested cascade delete on Store 2
+```
+
+---
+
+### Tip #6: Multiple User Testing
+
+Test multi-user scenarios:
+
+1. **Create User A:**
+   - Register: `userA`
+   - Create stores/items for userA
+
+2. **Create User B:**
+   - Register: `userB`
+   - Create stores/items for userB
+
+3. **Test Authorization:**
+   - Login as userA
+   - Try to access userB's store → Should fail (401)
+   - Confirms auth is working!
+
+---
+
+### Tip #7: Quick Reference Sheet
+
+Keep this handy while testing:
+
+```
+BASE URL: http://127.0.0.1:5000
+
+QUICK COMMANDS:
+Register: POST /user/register
+Login:    POST /user/login
+Refresh:  POST /user/refresh (use refresh token!)
+Logout:   POST /user/logout
+
+CREATE:
+Store: POST /store/
+Item:  POST /item/ (needs store_id in body)
+Tag:   POST /tag/store/{id}
+
+GET ALL:
+Stores: GET /store/s
+Items:  GET /item/s
+Tags:   GET /tag/store/{id}/s
+
+GET ONE:
+Store: GET /store/{id}
+Item:  GET /item/{id}
+Tag:   GET /tag/{id}
+User:  GET /user/{id}
+
+UPDATE:
+Item: PUT /item/{id}
+
+DELETE:
+Store: DELETE /store/{id}
+Item:  DELETE /item/{id}
+Tag:   DELETE /tag/{id}
+User:  DELETE /user/{id}
+
+AUTH HEADER FORMAT:
+Authorization: Bearer {access_token}
+```
+
+---
+
+## 8. ENVIRONMENT VARIABLES (ADVANCED)
+
+### What Are Environment Variables?
+
+Instead of copying/pasting tokens into every request, store them once and reference them.
+
+### Setup in Insomnia
+
+1. **Click Environment Dropdown** (top left, says "No Environment")
+2. **Click "Manage Environments"**
+3. **Create New Environment:** `Flask API`
+4. **Add this JSON:**
+
+```json
+{
+  "base_url": "http://127.0.0.1:5000",
+  "access_token": "",
+  "refresh_token": "",
+  "user_id": "",
+  "store_id": "",
+  "item_id": "",
+  "tag_id": ""
+}
+```
+
+5. **Click "Done"**
+6. **Select** `Flask API` from dropdown
+
+### Using Environment Variables
+
+**In URL field:**
+```
+Instead of: http://127.0.0.1:5000/user/login
+Use:        {{ _.base_url }}/user/login
+```
+
+**In Headers:**
+```
+Instead of: Bearer eyJ0eXAi...
+Use:        Bearer {{ _.access_token }}
+```
+
+**In Body (for store_id):**
+```json
+{
+  "name": "Laptop",
+  "price": 999,
+  "store_id": {{ _.store_id }}
+}
+```
+
+### Updating Variables
+
+After login, update environment:
+1. Copy access_token from response
+2. Click environment dropdown → Manage
+3. Paste into `access_token` field
+4. Do same for refresh_token
+
+### Benefits
+
+✅ Update tokens once, all requests updated  
+✅ Easy to switch between test users  
+✅ No copy/paste errors  
+✅ Professional workflow  
+
+---
+
+## FINAL CHECKLIST
+
+Before ending your testing session:
+
+- [ ] All tests passed
+- [ ] Tokens saved (if needed later)
+- [ ] Testing log updated
+- [ ] Issues documented
+- [ ] Database backed up (optional: copy data-dev.sqlite)
+- [ ] Server stopped (`Ctrl+C`)
+
+---
+
+## QUICK TROUBLESHOOTING FLOWCHART
+
+```
+Problem?
+   ↓
+Can't connect to server?
+   Yes → Start Flask: python run.py
+   No ↓
+   
+401 Error?
+   Yes → Check token format & expiry
+   No ↓
+   
+404 Error?
+   Yes → Check resource ID exists
+   No ↓
+   
+400 Error?
+   Yes → Check JSON body format
+   No ↓
+   
+Check Flask terminal for errors
+```
+
+---
+
+## CONGRATULATIONS!
+
+You're now an Insomnia + Flask API testing master! 🎉
+
+**You've learned:**
+- ✅ Complete API testing workflow
+- ✅ JWT token management
+- ✅ All CRUD operations
+- ✅ Error handling and debugging
+- ✅ Pro tips and best practices
+- ✅ Environment variables
+
+**Keep this guide handy** for future testing sessions!
+
+---
+
+**END OF GUIDE**
+
+Questions? Check Flask terminal logs or review error section above.
